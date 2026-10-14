@@ -1,0 +1,32 @@
+services:
+  web:
+    build: .
+    ports:
+      - "8082:80"
+    volumes:
+      - .:/usr/share/nginx/html
+    environment:
+      APP_MODE: development
+    restart: always
+    depends_on:
+      - database
+
+  database:
+    image: postgres
+    environment:
+      POSTGRES_DB: example
+      POSTGRES_USER: example
+      POSTGRES_PASSWORD: /run/secrets/db_pass
+    ports:
+      - "5432:5432"
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U myuser -d mydatabase"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+secrets:
+  db_pass:
+    file: ./db_pass.txt
